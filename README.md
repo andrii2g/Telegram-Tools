@@ -13,10 +13,6 @@ Edit `src/TelegramStickerViewer/appsettings.json` and fill in:
 
 You can get `ApiId` and `ApiHash` from [my.telegram.org](https://my.telegram.org).
 
-Default session file path:
-
-- `data/wtelegram.session`
-
 The session file is created after the first successful Telegram login and lets the app reuse the saved authorization later.
 
 ## First Run
@@ -54,6 +50,8 @@ After login:
 1. Enter a sticker pack short name, for example `Animals`.
 2. Click `Load`.
 3. The app requests the sticker set from Telegram and shows the stickers on the page.
+
+![Animals](assets/animals.png)
 
 ## Notes
 
