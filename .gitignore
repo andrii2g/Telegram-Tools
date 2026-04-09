@@ -5,5 +5,3 @@ obj/
 *.suo
 .vs/
 *.session
-session.txt
-data/
