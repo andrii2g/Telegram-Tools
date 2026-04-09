@@ -1,0 +1,9 @@
+bin/
+obj/
+.dotnet/
+*.user
+*.suo
+.vs/
+*.session
+session.txt
+data/

@@ -1,0 +1,131 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Sticker Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 24px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        input {
+            padding: 8px;
+            min-width: 320px;
+        }
+
+        button {
+            padding: 8px 12px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .media {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        img, video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <h1>Telegram Sticker Viewer</h1>
+
+    <div class="toolbar">
+        <button id="loginBtn">Login</button>
+        <input id="pack" placeholder="Sticker set short name" />
+        <button id="loadBtn">Load</button>
+    </div>
+
+    <div id="meta"></div>
+    <div id="grid" class="grid"></div>
+
+    <script>
+        const loginBtn = document.getElementById('loginBtn');
+        const loadBtn = document.getElementById('loadBtn');
+        const packInput = document.getElementById('pack');
+        const meta = document.getElementById('meta');
+        const grid = document.getElementById('grid');
+
+        loginBtn.onclick = async () => {
+            const r = await fetch('/api/telegram/login', { method: 'POST' });
+            const j = await r.json();
+            alert(r.ok
+                ? `Logged in as ${j.username || [j.firstName, j.lastName].filter(Boolean).join(' ')}`
+                : 'Login failed');
+        };
+
+        loadBtn.onclick = async () => {
+            const shortName = packInput.value.trim();
+            if (!shortName) return;
+
+            const r = await fetch(`/api/sticker-sets/${encodeURIComponent(shortName)}`);
+            const j = await r.json();
+
+            if (!r.ok) {
+                alert(j.error || 'Failed');
+                return;
+            }
+
+            meta.textContent = `${j.title} (${j.shortName}) — ${j.count} stickers`;
+            grid.innerHTML = '';
+
+            for (const s of j.stickers) {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const media = document.createElement('div');
+                media.className = 'media';
+
+                if (s.isVideo) {
+                    const v = document.createElement('video');
+                    v.src = s.mediaUrl;
+                    v.autoplay = true;
+                    v.loop = true;
+                    v.muted = true;
+                    v.playsInline = true;
+                    media.appendChild(v);
+                } else if (s.isAnimated) {
+                    media.textContent = '.tgs animated sticker';
+                } else {
+                    const img = document.createElement('img');
+                    img.src = s.mediaUrl;
+                    img.alt = s.emoji || '';
+                    media.appendChild(img);
+                }
+
+                const emoji = document.createElement('div');
+                emoji.textContent = s.emoji || '';
+
+                card.appendChild(media);
+                card.appendChild(emoji);
+                grid.appendChild(card);
+            }
+        };
+    </script>
+</body>
+</html>
